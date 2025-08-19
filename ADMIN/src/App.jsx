@@ -5,11 +5,13 @@ import { Routes, Route } from 'react-router-dom';
 import Add from './pages/Add'
 import List from './pages/List'
 import Orders from './pages/Orders'
+import Chat from './pages/Chat'
 import Login from './components/Login';
 import { ToastContainer } from 'react-toastify';
 
 export const backend_Url = import.meta.env.VITE_BE_URL
 export const currency = "VND"
+export const url = import.meta.env.VITE_BE_URL
 
 // Hàm định dạng tiền tệ Việt Nam cho ADMIN
 export const formatCurrency = (amount) => {
@@ -44,6 +46,7 @@ const App = () => {
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
+                <Route path="/chat" element={<Chat token={token} />} />
               </Routes>
             </div>
           </div>

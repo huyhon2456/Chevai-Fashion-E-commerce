@@ -13,6 +13,7 @@ import PlaceOrder from './pages/PlaceOrder'
 import VerifyPayment from './pages/VerifyPayment'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
+import ChatWidget from './components/ChatWidget'
 import { ToastContainer, toast } from 'react-toastify';
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
         
       </Routes>
       <Footer />
+      <ChatWidget />
     </div>
   )
 }

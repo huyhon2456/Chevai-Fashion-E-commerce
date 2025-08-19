@@ -14,9 +14,8 @@ const Add = ({ token }) => {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Men");
+  const [productType, setProductType] = useState("T-shirt");
   const [sizes, setSizes] = useState([]);
-  const [subCategory, setSubCategory] = useState("Topwear");
   const [bestseller, setBestseller] = useState(false);
 
   const onSubmitHandler = async (e) => {
@@ -27,8 +26,7 @@ const Add = ({ token }) => {
       formData.append('name', name)
       formData.append('price', price)
       formData.append('description', description)
-      formData.append('category', category)
-      formData.append('subCategory', subCategory)
+      formData.append('productType', productType)
       formData.append('sizes', JSON.stringify(sizes))
       formData.append('bestseller', bestseller)
 
@@ -96,26 +94,20 @@ const Add = ({ token }) => {
 
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
         <div>
-          <p className='mb-2'>Product Category</p>
-          <select onChange={(e) => setCategory(e.target.value)} value={category} className='w-full px-3 py-2'>
-            <option value="Men">Men</option>
-            <option value="Women">Women</option>
-            <option value="Kids">Kids</option>
+          <p className='mb-2'>Product Type</p>
+          <select onChange={(e) => setProductType(e.target.value)} value={productType} className='w-full px-3 py-2'>
+            <option value="T-shirt">T-shirt</option>
+            <option value="RelaxedFit">Áo Thun Relaxed Fit</option>
+            <option value="Ringer">Áo Thun Ringer</option>
+            <option value="Hoodie">Áo Hoodie</option>
+            <option value="Sweater">Áo Sweater</option>
+            <option value="Jogger">Quần Jogger & Ống Suông</option>
+           
           </select>
         </div>
-
-        <div>
-          <p className='mb-2'>Sub Category</p>
-          <select onChange={(e) => setSubCategory(e.target.value)} value={subCategory} className='w-full px-3 py-2'>
-            <option value="Topwear">Topwear</option>
-            <option value="Bottomwear">Bottomwear</option>
-            <option value="Winterwear">Winterwear</option>
-          </select>
-        </div>
-
         <div>
           <p className='mb-2'>Product Price (VND)</p>
-          <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder="Ex: 500000" required />
+          <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder="" required />
         </div>
       </div>
       <div>

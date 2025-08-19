@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.jsx'
 import {BrowserRouter} from 'react-router-dom'
 import ShopContextProvider from './context/ShopContext.jsx'
+import ChatContextProvider from './context/ChatContext.jsx'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <ShopContextProvider>
-      <App />
+      <ChatContextProvider>
+        <App />
+      </ChatContextProvider>
     </ShopContextProvider>
   </BrowserRouter>,
 )

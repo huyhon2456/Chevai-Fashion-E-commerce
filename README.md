@@ -12,6 +12,7 @@ A full-stack e-commerce fashion website built with React.js, Node.js, and MongoD
 - 👤 **User authentication** (Login/Register)
 - 📦 **Order management** and history
 - 💳 **Multiple payment methods** (COD, VNPay)
+- 🤖 **AI Chat Assistant** with intelligent product recommendations
 - 📱 **Responsive design** for all devices
 
 ### Admin Panel
@@ -19,6 +20,7 @@ A full-stack e-commerce fashion website built with React.js, Node.js, and MongoD
 - ➕ **Product management** (Add, Edit, Delete)
 - 📋 **Order management** with status updates
 - 👥 **User management**
+- 💬 **Live chat support** with customers
 - 📈 **Sales analytics**
 
 ### Backend
@@ -26,6 +28,8 @@ A full-stack e-commerce fashion website built with React.js, Node.js, and MongoD
 - 🗄️ **MongoDB** database
 - ☁️ **Cloudinary** image storage
 - 💰 **VNPay** payment integration
+- 🤖 **Hybrid AI System** (Custom + Gemini AI)
+- 💬 **Real-time chat** with Socket.io
 - 🛡️ **Secure API** endpoints
 
 ## 🚀 Tech Stack
@@ -45,6 +49,16 @@ A full-stack e-commerce fashion website built with React.js, Node.js, and MongoD
 - JWT for authentication
 - Multer for file uploads
 - Bcrypt for password hashing
+- Socket.io for real-time communication
+- Google Gemini AI API
+- Custom AI engine
+
+**AI Features:**
+- Hybrid AI system (Custom + Gemini AI)
+- Intelligent product recommendations
+- Natural language processing
+- Image-based product discovery
+- Conversation context management
 
 **Payment Integration:**
 - VNPay Gateway
@@ -87,6 +101,7 @@ vnp_TmnCode=your_vnpay_terminal_code
 vnp_HashSecret=your_vnpay_hash_secret
 vnp_Url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 vnp_ReturnUrl=http://localhost:5173/verify-payment
+GEMINI_API_KEY=your_google_gemini_api_key
 ```
 
 Start backend server:

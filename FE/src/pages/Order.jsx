@@ -39,7 +39,7 @@ const Order = () => {
   return (
     <div className='border-t pt-16'>
       <div className='text-2xl'>
-        <Title text1={'MY'} text2={'ORDERS'} />
+        <Title text2={'ĐƠN HÀNG CỦA TÔI'} />
       </div>
       <div>
         {orderData.map((item, index) => (
@@ -50,12 +50,12 @@ const Order = () => {
                 <p className='sm:text-base font-medium'>{item.name}</p>
                 <div className='flex items-center gap-3 mt-1 text-base text-gray-700'>
                   <p className='text-lg'>{formatCurrency(item.price)}</p>
-                  <p>Quantity: {item.quantity}</p>
-                  <p>Size: {item.size}</p>
+                  <p>Số Lượng: {item.quantity}</p>
+                  <p>Kích Cỡ: {item.size}</p>
                 </div>
-                <p className='mt-1'>Date: <span className='text-gray-400'>{new Date(item.date).toDateString()}</span></p>
-                <p className='mt-1'>Payment: <span className='text-gray-400'>{item.paymentMethod}</span></p>
-                <p className='mt-1'>Payment Status: <span className='text-gray-400'>{item.payment ? 'Paid' : 'Pending'}</span></p>
+                <p className='mt-1'>Ngày: <span className='text-gray-400'>{new Date(item.date).toLocaleDateString()}</span></p>
+                <p className='mt-1'>Phương Thức Thanh Toán: <span className='text-gray-400'>{item.paymentMethod}</span></p>
+                <p className='mt-1'>Trạng Thái Thanh Toán: <span className='text-gray-400'>{item.payment ? 'Đã Thanh Toán' : 'Chưa Thanh Toán'}</span></p>
               </div>
             </div>
             <div className='md:w-1/2 flex justify-between'>
@@ -63,7 +63,7 @@ const Order = () => {
                 <p className='min-w-2 h-2 rounded-full bg-green-500'></p>
                 <p className='text-sm md:text-base'>{item.status}</p>
               </div>
-              <button onClick={loadOrderData} className='border px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
+              <button onClick={loadOrderData} className='border px-4 py-2 text-sm font-medium rounded-sm'>Theo Dõi Đơn Hàng</button>
             </div>
           </div>
         ))}

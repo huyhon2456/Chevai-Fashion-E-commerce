@@ -10,12 +10,15 @@ const ShopContextProvider = (props) => {
 
     const currency = 'VND';
     const delivery_fee = 50000;
+    // Free shipping for orders with subtotal >= 2,000,000 VND
+    const free_shipping_threshold = 2000000;
     const backendUrl = import.meta.env.VITE_BE_URL
     const [Search, setSearch] = useState('');
     const [ShowSearch, setShowSearch] = useState(false)
     const [Cart, setCart] = useState({});
     const [products, setProducts] = useState([]);
     const [token, setToken] = useState('')
+    const [userData, setUserData] = useState(null)
     const navigate = useNavigate();
 
     // Hàm định dạng tiền tệ Việt Nam
@@ -133,6 +136,23 @@ const ShopContextProvider = (props) => {
         }
     }
 
+    const getUserData = async (token) => {
+        try {
+            const response = await axios.get(backendUrl + '/api/user/profile', { headers: { token } })
+            if (response.data.success) {
+                setUserData(response.data.user)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    // Tính phí vận chuyển dựa trên tổng trước giảm giá
+    const getDeliveryFee = (subtotal) => {
+        if (!subtotal || subtotal === 0) return 0;
+        return subtotal >= free_shipping_threshold ? 0 : delivery_fee;
+    }
+
     useEffect(() => {
         getProductsData();
     }, [])
@@ -141,16 +161,19 @@ const ShopContextProvider = (props) => {
         if (!token && localStorage.getItem('token')) {
             setToken(localStorage.getItem('token'))
             getUserCart(localStorage.getItem('token'))
+            getUserData(localStorage.getItem('token'))
+        } else if (token) {
+            getUserData(token)
         }
-    }, [])
+    }, [token])
 
     const value = {
-        products, currency, delivery_fee,
+    products, currency, delivery_fee, free_shipping_threshold, getDeliveryFee,
         Search, setSearch, ShowSearch, setShowSearch,
         Cart, AddToCart, setCart,
         getCartCount, upQuantity,
         CartAmount, navigate, backendUrl,
-        token, setToken, formatCurrency
+        token, setToken, formatCurrency, userData, setUserData
     }
     return (
         <ShopContext.Provider value={value}>

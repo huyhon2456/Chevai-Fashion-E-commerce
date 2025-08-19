@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 const Login = () => {
 
-  const [currentState, setCurrentState] = useState('Login');
+  const [currentState, setCurrentState] = useState('Đăng nhập');
   const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
 
   const [name, setName] = useState('')
@@ -14,13 +14,13 @@ const Login = () => {
   const onSubmitHandler = async (Event) => {
     Event.preventDefault();
     try {
-      if (currentState === 'Sign Up') {
+      if (currentState === 'Đăng kí') {
         const response = await axios.post(backendUrl + '/api/user/register', { name, email, password, comfirm_password })
         if (response.data.success) {
           /*setToken(response.data.token)
           localStorage.setItem('token', response.data.token)*/
           toast.success(response.data.message)
-          setCurrentState('Login');
+          setCurrentState('Đăng nhập');
         } else {
           toast.error(response.data.message)
         }
@@ -51,19 +51,19 @@ const Login = () => {
         <p className='prata-regular text-3xl'>{currentState}</p>
         <hr className='border-none h-[1.5px] w-8 bg-gray-800' />
       </div>
-      {currentState === 'Login' ? '' : <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='w-full px-3 py-2 border border-gray-900' placeholder='Name' required />}
+      {currentState === 'Đăng nhập' ? '' : <input onChange={(e) => setName(e.target.value)} value={name} type="text" className='w-full px-3 py-2 border border-gray-900' placeholder='Tên' required />}
       <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" className='w-full px-3 py-2 border border-gray-900' placeholder='Email' required />
-      <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" className='w-full px-3 py-2 border border-gray-900' placeholder='Password' required />
-      {currentState === 'Login' ? '' : <input onChange={(e) => setComfirmPassord(e.target.value)} value={comfirm_password} type="password" className='w-full px-3 py-2 border border-gray-900' placeholder='Comfirm Password' required />}
+      <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" className='w-full px-3 py-2 border border-gray-900' placeholder='Mật khẩu' required />
+      {currentState === 'Đăng nhập' ? '' : <input onChange={(e) => setComfirmPassord(e.target.value)} value={comfirm_password} type="password" className='w-full px-3 py-2 border border-gray-900' placeholder='Nhập lại mật khẩu' required />}
       <div className='w-full flex justify-between text-sm mt-[-8px]'>
-        <p className='cursor-pointer'>Forgot password?</p>
+        <p className='cursor-pointer'>Quên mật khẩu</p>
         {
-          currentState === 'Login'
-            ? <p onClick={() => setCurrentState('Sign Up')} className='cursor-pointer'>Create Account</p>
-            : <p onClick={() => setCurrentState('Login')} className='cursor-pointer'>Login Here</p>
+          currentState === 'Đăng nhập'
+            ? <p onClick={() => setCurrentState('Đăng kí')} className='cursor-pointer'>Đăng kí ngay</p>
+            : <p onClick={() => setCurrentState('Đăng nhập')} className='cursor-pointer'>Đăng nhập</p>
         }
       </div>
-      <button className=' border border-black hover:bg-black hover:text-white transition-all duration-500 font-light px-8 py-2 mt-4'>{currentState === 'Login' ? 'Sign In' : 'Sign Up'}</button>
+      <button className=' border border-black hover:bg-black hover:text-white transition-all duration-500 font-light px-8 py-2 mt-4'>{currentState === 'Đăng nhập' ? 'Đăng nhập' : 'Đăng kí'}</button>
     </form>
   )
 }

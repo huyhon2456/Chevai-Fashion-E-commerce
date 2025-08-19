@@ -8,30 +8,30 @@ const Footer = () => {
             <div>
                 <img src={assets.logo} className='mb-5 w-32' alt="" />
                 <p className='w-full md:w-2/3 text-gray-600'>
-                Elevate your style with refined designs and premium fabrics.
+                Nâng tầm phong cách của bạn với những thiết kế tinh tế và chất liệu cao cấp.
                 </p>
                 <p className='w-full md:w-2/3 text-gray-600'>
-                More than just clothing, it’s a statement of your personality.
+                Hơn cả một bộ trang phục, đó là tuyên ngôn về cá tính của bạn.
                 </p>
                 <p className='w-full md:w-2/3 text-gray-600'>
-                Redefining fashion: Modern, elegant, and always ahead of the trend.
+                Định nghĩa thời trang: Hiện đại, thanh lịch và luôn đi trước xu hướng.
                 </p>
                 <p className='w-full md:w-2/3 text-gray-600'>
-                Turning every outfit into a bold expression of your individuality.
+                Biến mọi bộ trang phục thành một tuyên ngôn táo bạo về cá tính của bạn.
                 </p>
 
             </div>
             <div>
-                <p className='text-xl font-medium mb-5'>Chevai</p>
+                <p className='text-xl font-medium mb-5'>THÔNG TIN</p>
                 <ul className='flex flex-col gap-1 text-gray-600'>
-                    <li>Home</li>
-                    <li>About us</li>
-                    <li>Delivery</li>
-                    <li>Privacy policy</li>
+                    <li>Trang chủ</li>
+                    <li>Giới thiệu</li>
+                    <li>Giao hàng</li>
+                    <li>Chính sách bảo mật</li>
                 </ul>
             </div>
             <div>
-                <p className='text-xl font-medium mb-5'>GET STARTED</p>
+                <p className='text-xl font-medium mb-5'>DỊCH VỤ</p>
                 <ul className='flex flex-col gap-1 text-gray-600'>
                     <li>+89 01 363 148</li>
                     <li>Chevai@.com</li>
@@ -40,7 +40,7 @@ const Footer = () => {
         </div>
             <div>
                 <hr />
-                <p className='py-5 text-sm text-center'>Copyright 2025@ Chevai.com - All Right Reserved. </p>
+                <p className='py-5 text-sm text-center'>Copyright 2025@ Chevai.com </p>
             </div>
     </div>
   )

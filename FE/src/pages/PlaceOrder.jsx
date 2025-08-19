@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
-  const { navigate, backendUrl, token, Cart, setCart, CartAmount, delivery_fee, products } = useContext(ShopContext);
+  const { navigate, backendUrl, token, Cart, setCart, CartAmount, getDeliveryFee, products } = useContext(ShopContext);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -48,7 +48,7 @@ const PlaceOrder = () => {
       const totalProductPrice = CartAmount();
       const discount = totalProductPrice >= 10000000 ? parseFloat((totalProductPrice * 0.2).toFixed(2)) : 0;
       const finalProductPrice = totalProductPrice - discount;
-      const finalDeliveryFee = totalProductPrice >= 18000000 || totalProductPrice === 0 ? 0 : delivery_fee;
+  const finalDeliveryFee = getDeliveryFee(totalProductPrice);
       const totalAmount = finalProductPrice + finalDeliveryFee;
       
       let orderData = {
@@ -96,22 +96,22 @@ const PlaceOrder = () => {
       {/* slide bên trái*/}
       <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
         <div className='text-xl sm:text-2xl my-3'>
-          <Title text1={'DELIVERY'} text2={'INFORMATION'} />
+          <Title  text2={'THÔNG TIN VẬN CHUYỂN'} />
         </div>
         <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First Name' />
-          <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last Name' />
+          <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Họ' />
+          <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Tên' />
         </div>
         <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="email" placeholder='Email' />
-        <input required onChange={onChangeHandler} name='phoneNumber' value={formData.phoneNumber} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Phone Number' />
-        <input required onChange={onChangeHandler} name='homeNumber' value={formData.homeNumber} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Home Number' />
+        <input required onChange={onChangeHandler} name='phoneNumber' value={formData.phoneNumber} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="number" placeholder='Số Điện Thoại' />
+        <input required onChange={onChangeHandler} name='homeNumber' value={formData.homeNumber} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Số Nhà' />
         <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='stress' value={formData.stress} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Stress' />
-          <input required onChange={onChangeHandler} name='ward' value={formData.ward} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Ward' />
+          <input required onChange={onChangeHandler} name='stress' value={formData.stress} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Đường' />
+          <input required onChange={onChangeHandler} name='ward' value={formData.ward} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Phường' />
         </div>
         <div className='flex gap-3'>
-          <input required onChange={onChangeHandler} name='district' value={formData.district} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='District' />
-          <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City' />
+          <input required onChange={onChangeHandler} name='district' value={formData.district} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Quận' />
+          <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Thành Phố' />
         </div>
       </div>
       {/*slide bên phải */}
@@ -121,7 +121,7 @@ const PlaceOrder = () => {
         </div>
         {/*phương thức thanh toán */}
         <div className='mt-10'>
-          <Title text1={'PAYMENT'} text2={'METHOD'} />
+          <Title text2={'PHƯƠNG THỨC THANH TOÁN'} />
           <div className='flex gap-3 flex-col lg:flex-row'>
             <div onClick={() => setMethod('momo')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
               <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'momo' ? 'bg-gray-400' : ''}`}></p>
@@ -133,11 +133,11 @@ const PlaceOrder = () => {
             </div>
             <div onClick={() => setMethod('cod')} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
               <p className={`min-w-3.5 h-3.5 border rounded-full ${method === 'cod' ? 'bg-gray-400' : ''}`}></p>
-              <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
+              <p className='text-gray-500 text-sm font-medium mx-4'>THANH TOÁN KHI NHẬN HÀNG</p>
             </div>
           </div>
           <div className='w-full text-xl mt-8'>
-            <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+            <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>ĐẶT HÀNG</button>
           </div>
         </div>
       </div>

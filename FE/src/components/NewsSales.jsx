@@ -7,14 +7,14 @@ const NewsSales = () => {
     }
 
   return (
-    <div className='text-center'>
-        <p className='text-2xl font-medium text-gray-800'>Subscribe & get 20% off every order</p>
+    <div className='text-center items-center'>
+        <p className='text-2xl font-medium text-gray-800 '>THEO DÕI CHÚNG MÌNH</p>
         <p className='text-gray-400 mt-3'>
-        Bring comfort and closeness to each outfit as well as being fashionable
+       Đăng kí để nhận các ưu đãi đặc biệt và các thông tin khác.
         </p>
         <form onSubmit={SubmitHandler} className='w-full sm:w-1/2 flex items-center gap-3 mx-auto my-6 border pl-3'>
-            <input className='w-full sm:flex-1 outline-none' type='email' placeholder='Enter your email' required/>
-            <button type='submit' className='bg-black text-white text-xs px-10 py-4'>SUBSCRIBE</button>
+            <input className='w-full sm:flex-1 outline-none' type='email' placeholder='Email' required/>
+            <button type='submit' className='bg-black text-white text-xs px-10 py-4'>ĐĂNG KÍ</button>
         </form>
     </div>
   )
