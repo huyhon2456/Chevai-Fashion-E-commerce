@@ -1,8 +1,7 @@
 # 🛍️ Chevai Fashion E-commerce
+Link figma: figma.com/design/QcSgco3TAtoy8cjWsQGTkB/Chevai-e-comerce-figma?node-id=0-1&p=f&t=2ut2BVWp4ng4VRAQ-0
 
 **Một website thời trang e-commerce đầy đủ tính năng với AI thông minh, được xây dựng bằng React.js, Node.js và MongoDB**
-
----
 
 ## 🌟 Tính Năng Nổi Bật
 
