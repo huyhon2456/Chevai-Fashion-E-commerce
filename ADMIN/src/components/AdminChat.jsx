@@ -330,7 +330,7 @@ const AdminChat = () => {
         <div className="flex flex-col lg:flex-row h-screen lg:h-[600px] bg-white rounded-lg shadow-2xl overflow-hidden">
             {/* Mobile Header */}
             <div className="lg:hidden bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center">
-                <h2 className="text-lg font-semibold">Admin Chat</h2>
+                <h2 className="text-lg font-semibold">Trò chuyện với Admin</h2>
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
@@ -344,7 +344,7 @@ const AdminChat = () => {
             {/* Chat Rooms List */}
             <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} lg:block w-full lg:w-1/3 border-r border-gray-200 bg-gray-50`}>
                 <div className="hidden lg:block p-4 border-b border-gray-200 bg-white">
-                    <h2 className="text-lg font-semibold text-gray-800">Chat Rooms</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Danh sách phòng chat</h2>
                     <p className="text-sm text-gray-500">Quản lý cuộc trò chuyện</p>
                 </div>
                 <div className="overflow-y-auto h-full lg:h-[calc(100%-80px)] max-h-screen lg:max-h-none">

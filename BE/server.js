@@ -36,7 +36,6 @@ app.use('/api/order', orderRouter)
 app.use('/api/chat', chatRouter)
 app.use('/api/learning', learningRouter)
 
-app.use('/api/tryon', tryonRouter)
 app.get('/', (req, res) => {
    res.send("good api")
 })

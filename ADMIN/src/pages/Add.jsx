@@ -61,7 +61,7 @@ const Add = ({ token }) => {
   return (
     <form onSubmit={onSubmitHandler} className='flex flex-col w-full items-start gap-3'>
       <div>
-        <p className='mb-2'>Upload Image</p>
+        <p className='mb-2'>Hình ảnh</p>
 
         <div className='flex gap-2'>
           <label htmlFor="image1">
@@ -83,18 +83,18 @@ const Add = ({ token }) => {
         </div>
       </div>
       <div className='w-full'>
-        <p className='mb-2'>Product Name</p>
-        <input onChange={(e) => setName(e.target.value)} value={name} className=' w-full max-w-[500px] px-3 py-2' type="text" placeholder='Type name' required />
+        <p className='mb-2'>Tên sản phẩm</p>
+        <input onChange={(e) => setName(e.target.value)} value={name} className=' w-full max-w-[500px] px-3 py-2' type="text" placeholder='Tên..' required />
       </div>
 
       <div className='w-full'>
-        <p className='mb-2'>Product Description</p>
-        <textarea onChange={(e) => setDescription(e.target.value)} value={description} className=' w-full max-w-[500px] px-3 py-2' type="text" placeholder='Write Content ' required />
+        <p className='mb-2'>Mô tả sản phẩm</p>
+        <textarea onChange={(e) => setDescription(e.target.value)} value={description} className=' w-full max-w-[500px] px-3 py-2' type="text" placeholder='Nội dung...' required />
       </div>
 
       <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
         <div>
-          <p className='mb-2'>Product Type</p>
+          <p className='mb-2'>Loại sản phẩm</p>
           <select onChange={(e) => setProductType(e.target.value)} value={productType} className='w-full px-3 py-2'>
             <option value="T-shirt">T-shirt</option>
             <option value="RelaxedFit">Áo Thun Relaxed Fit</option>
@@ -106,12 +106,12 @@ const Add = ({ token }) => {
           </select>
         </div>
         <div>
-          <p className='mb-2'>Product Price (VND)</p>
+          <p className='mb-2'>Giá sản phẩm (VND)</p>
           <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px]' type="number" placeholder="" required />
         </div>
       </div>
       <div>
-        <p className='mb-2'>Product Sizes</p>
+        <p className='mb-2'>Kích thước sản phẩm</p>
         <div className='flex gap-3'>
           <div onClick={() => setSizes(prev => prev.includes("S") ? prev.filter(item => item !== "S") : [...prev, "S"])}>
             <p className={`${sizes.includes("S") ? "bg-slate-300" : "bg-white"} border border-black px-3 py-1 cursor-pointer`}>S</p>
@@ -132,10 +132,10 @@ const Add = ({ token }) => {
       </div>
       <div className='flex gap-2 mt-2'>
         <input onChange={() => setBestseller(prev => !prev)} checked={bestseller} type="checkbox" id='bestseller' />
-        <label className='cursor-pointer' htmlFor="bestseller">Add bestseller</label>
+        <label className='cursor-pointer' htmlFor="bestseller">Thêm Bestseller</label>
       </div>
 
-      <button type='submit' className='w-28 py-3 mt-4 bg-black text-white'>ADD</button>
+      <button type='submit' className='w-28 py-3 mt-4 bg-black text-white'>Thêm</button>
     </form>
   )
 }

@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import RelatedProducts from '../components/RelatedProducts'
-import TryOnModal from '../components/TryOnModal'
+import { toast } from 'react-toastify'
 
 
 const Product = () => {
-    
+
   const sizeGuideImages = {
     'T-shirt': assets.tshirt,
     'RelaxedFit': assets.tshirt,
@@ -15,10 +15,10 @@ const Product = () => {
     'Hoodie': assets.hoodie,
     'Sweater': assets.sweeter,
     'Jogger': assets.pant,
-   
+
   };
   const [tab, setTab] = useState('size');
-  const [showTryOn, setShowTryOn] = useState(false);
+
   const toggleTab = (key) => {
     setTab(tab === key ? '' : key);
   };
@@ -27,11 +27,21 @@ const Product = () => {
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState('')
   const [size, setSize] = useState('')
-  
+
+  // Try-on states
+  const [showTryOnModal, setShowTryOnModal] = useState(false)
+  const [userImage, setUserImage] = useState(null)
+  const [userImagePreview, setUserImagePreview] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [tryOnResult, setTryOnResult] = useState(null)
+
 
   const fetchProductData = async () => {
+
+
     products.map((item) => {
       if (item._id === productId) {
+
         setProductData(item)
         setImage(item.image[0])
         return null;
@@ -41,6 +51,143 @@ const Product = () => {
   useEffect(() => {
     fetchProductData();
   }, [productId, products])
+
+  // Convert image to RGB format using Canvas
+  const convertToRGB = (file) => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Fill with white background first to remove alpha channel
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw image on top
+        ctx.drawImage(img, 0, 0);
+
+        // Convert to JPEG blob (RGB format)
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to convert image to RGB'));
+          }
+        }, 'image/jpeg', 0.95);
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Handle user image selection
+  const handleUserImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file ảnh');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Kích thước file quá lớn. Tối đa 10MB');
+      return;
+    }
+
+    try {
+      // Convert to RGB format
+      const rgbBlob = await convertToRGB(file);
+      setUserImage(rgbBlob);
+
+      // Create preview
+      const previewUrl = URL.createObjectURL(rgbBlob);
+      setUserImagePreview(previewUrl);
+
+      toast.success('Ảnh đã được chuyển đổi sang định dạng RGB');
+    } catch (error) {
+      console.error('Error converting image:', error);
+      toast.error('Lỗi khi xử lý ảnh: ' + error.message);
+    }
+  };
+
+  // Handle try-on process
+  const handleTryOn = async () => {
+    if (!userImage) {
+      toast.error('Vui lòng chọn ảnh của bạn');
+      return;
+    }
+
+    if (!productData || !productData.image || productData.image.length === 0) {
+      toast.error('Sản phẩm không có ảnh để thử đồ');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const toastId = toast.info('Đang xử lý thử đồ, vui lòng đợi...', {
+        autoClose: false,
+        hideProgressBar: false
+      });
+
+      // Convert product image to RGB blob
+      const productImageBlob = await fetch(productData.image[0])
+        .then(response => response.blob())
+        .then(async (blob) => {
+          // Convert to File object first
+          const file = new File([blob], 'product-image.jpg', { type: 'image/jpeg' });
+          // Convert to RGB
+          return await convertToRGB(file);
+        });
+
+      // Create FormData with RGB images
+      const formData = new FormData();
+      formData.append('people', userImage, 'user-image.jpg');
+      formData.append('clothes', productImageBlob, 'product-image.jpg');
+
+      // Call try-on API
+      const response = await fetch(`http://localhost:4000/api/product/tryOnClothes`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      toast.dismiss(toastId);
+
+      console.log('Try-on result:', result);
+
+      if (result.success) {
+        setTryOnResult(result.imageUrl);
+        toast.success(result.message || 'Try-on thành công!');
+      } else {
+        toast.error(result.message || 'Không thể thực hiện try-on');
+      }
+
+    } catch (error) {
+      console.error('Error in try-on:', error);
+      toast.error('Có lỗi xảy ra khi thử đồ: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Close modal and reset states
+  const closeTryOnModal = () => {
+    setShowTryOnModal(false);
+    setUserImage(null);
+    setUserImagePreview('');
+    setTryOnResult(null);
+    setIsLoading(false);
+  };
 
   return productData ? (
     <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100'>
@@ -81,20 +228,20 @@ const Product = () => {
             </div>
           </div>
           <div className='flex flex-wrap gap-3 mt-2'>
-            <button onClick={() => AddToCart(productData._id, size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>
-              THÊM VÀO GIỎ</button>
-            {/*nút thử đồ */}
-            <button 
-              onClick={() => setShowTryOn(true)} 
-              className='bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 text-sm rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg'>
-              🤖 THỬ NGAY (AI)
+            <button onClick={() => AddToCart(productData._id, size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700 rounded-full'>
+              THÊM VÀO GIỎ
+            </button>
+            <button
+              onClick={() => setShowTryOnModal(true)}
+              className=' text-white px-8 py-3 text-sm bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-full'>
+              THỬ NGAY VỚI AI
             </button>
           </div>
           <hr className='mt-8 sm:w-4/5' />
           <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
-            <p>Vui lòng kiểm tra size cẩn thận trước khi đặt hàng.</p>
-            <p>Vui lòng quay video khi mở gói hàng.</p>
-            <p>Cửa hàng chỉ chấp nhận đổi hoặc trả lại áo nếu khách hàng có video.</p>
+            <p>- Vui lòng kiểm tra size cẩn thận trước khi đặt hàng.</p>
+            <p>- Vui lòng quay video khi mở gói hàng.</p>
+            <p>- Cửa hàng chỉ chấp nhận đổi hoặc trả lại áo nếu khách hàng có video.</p>
 
           </div>
           {/*các hướng dẫn */}
@@ -154,17 +301,135 @@ const Product = () => {
       </div>
 
       {/* Try-On Modal */}
-      {showTryOn && (
-        <TryOnModal
-          productImageUrl={image}
-          productName={productData.name}
-          onClose={() => setShowTryOn(false)}
-        />
+      {showTryOnModal && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+          <div className='bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto'>
+            <div className='p-6'>
+              {/* Modal Header */}
+              <div className='flex justify-between items-center mb-6'>
+                <h2 className='text-2xl font-bold'>Thử đồ AI</h2>
+                <button
+                  onClick={closeTryOnModal}
+                  className='text-gray-500 hover:text-gray-700 text-2xl'
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                {/* Left side - Upload user image */}
+                <div>
+                  <h3 className='text-lg font-semibold mb-4'>1. Chọn ảnh của bạn</h3>
+                  <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center relative'>
+                    {userImagePreview ? (
+                      <div className='w-full h-64 flex items-center justify-center bg-gray-50 rounded overflow-hidden'>
+                        <img
+                          src={userImagePreview}
+                          alt="User preview"
+                          className='max-w-full max-h-full object-contain'
+                        />
+                        <button
+                          onClick={() => {
+                            setUserImage(null);
+                            setUserImagePreview('');
+                          }}
+                          className='absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600'
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className='text-gray-500 mb-4'>
+                          <svg className='mx-auto h-12 w-12' stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                        <label className='cursor-pointer'>
+                          <span className='bg-black text-white px-4 py-2 rounded hover:bg-blue-700'>
+                            Chọn ảnh
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleUserImageChange}
+                            className='hidden'
+                          />
+                        </label>
+                        <p className='text-gray-500 text-sm mt-2'>
+                          Định dạng: JPG, PNG (tối đa 10MB)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right side - Product info and try-on result */}
+                <div>
+                  <h3 className='text-lg font-semibold mb-4'>2. Sản phẩm sẽ thử</h3>
+                  <div className='border rounded-lg p-4 mb-4'>
+                    <div className='w-full h-48 flex items-center justify-center bg-gray-50 rounded mb-2 overflow-hidden'>
+                      <img
+                        src={productData.image[0]}
+                        alt={productData.name}
+                        className='max-w-full max-h-full object-contain'
+                      />
+                    </div>
+                    <p className='font-medium'>{productData.name}</p>
+                    <p className='text-gray-600'>{formatCurrency(productData.price)}</p>
+                  </div>
+
+                  {/* Try-on result */}
+                  {tryOnResult && (
+                    <div>
+                      <h3 className='text-lg font-semibold mb-4'>3. Kết quả thử đồ</h3>
+                      <div className='border rounded-lg p-4 '>
+                        <div className='w-full h-64 flex items-center justify-center bg-gray-50 rounded overflow-hidden'>
+                          <img
+                            src={tryOnResult}
+                            alt="Try-on result"
+                            className='max-w-full max-h-full object-contain '
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Try-on button */}
+              <div className='mt-6 flex justify-center'>
+                <button
+                  onClick={handleTryOn}
+                  disabled={!userImage || isLoading}
+                  className={`px-8 py-3 rounded text-white font-medium ${!userImage || isLoading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-black hover:bg-gray-700'
+                    }`}
+                >
+                  {isLoading ? 'Đang xử lý...' : 'Thử đồ'}
+                </button>
+              </div>
+
+              {/* Instructions */}
+              <div className='mt-6 text-sm text-gray-600'>
+                <h4 className='font-bold mb-2'>Lưu ý:</h4>
+                <ul className='list-disc list-inside space-y-1'>
+                  <li>Ảnh của bạn nên rõ nét, không bị mờ</li>
+                  <li>Nên chụp toàn thân để có kết quả tốt nhất</li>
+                  <li>Quá trình xử lý có thể mất 30-60 giây</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-     
+
       {/*sản phẫm liên quan*/}
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
     </div>
   ) : <div className='opacity-0'></div>
 }
+
 export default Product

@@ -41,7 +41,7 @@ const Orders = ({token}) => {
 
   return (
     <div>
-      <h1>Admin Orders</h1>
+      <p className='mb-2 text-2xl font-bold'>ĐƠN HÀNG</p>
       <div>
         {
           orders.map((order, index) => (
@@ -49,7 +49,7 @@ const Orders = ({token}) => {
               <img className='w-15' src={assets.parcel_icon} alt="" />
               <div>
                 <div>
-                  <p className='mt-3 mb-2 font-bold'>Orders by: {order.address.firstName + " " + order.address.lastName}</p>
+                  <p className='mt-3 mb-2 font-bold'>Đơn hàng của: {order.address.firstName + " " + order.address.lastName}</p>
                   {order.items.map((item, index) => {
                     if (index === order.items.length - 1) {
                       return <p className='py-0.5' key={index}>{item.name} x {item.quantity} <span>{item.size}</span></p>
@@ -59,16 +59,16 @@ const Orders = ({token}) => {
                   })}
                 </div>
                 <div>
-                  <p>Address: {order.address.homeNumber + ", " + order.address.stress + ", " + order.address.ward + ", " + order.address.district + ", " + order.address.city}</p>
+                  <p>Địa chỉ: {order.address.homeNumber + ", " + order.address.stress + ", " + order.address.ward + ", " + order.address.district + ", " + order.address.city}</p>
                 </div>
-                <p>Phone: {order.address.phoneNumber}</p>
+                <p>Điện thoại: {order.address.phoneNumber}</p>
               </div>
               <div>
-                <p className='text-sm sm:text-[15px]'>Items: {order.items.length}</p>
-                <p className='mt-3'>Method: {order.paymentMethod}</p>
-                <p>Payment: {order.payment ? 'Done' : 'Pending'}</p>
-                <p>Payment Status: {order.payment ? 'Paid' : 'Pending'}</p>
-                <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+                <p className='text-sm sm:text-[15px]'>Số lượng: {order.items.length}</p>
+                <p className='mt-3'>Phương thức: {order.paymentMethod}</p>
+                {/* {<p>Thanh toán: {order.payment ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>} */}
+                <p>Trạng thái: {order.payment ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
+                <p>Ngày: {new Date(order.date).toLocaleDateString()}</p>
               </div>
               <p className='text-sm sm:text-[15px]'>{formatCurrency(order.amount)}</p>
               <select onChange={(event)=>statusHandler(event,order._id)} value={order.status} className='p-2 font-semibold' >

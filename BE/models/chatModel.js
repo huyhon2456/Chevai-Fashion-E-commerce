@@ -6,7 +6,7 @@ const chatSchema = new mongoose.Schema({
     senderName: { type: String, required: true },
     senderType: { type: String, enum: ['user', 'admin', 'ai'], required: true },
     message: { type: String, required: true },
-    image: { type: String, required: false }, // AI có thể gửi ảnh sản phẩm
+    image: { type: String, required: false }, 
     timestamp: { type: Date, default: Date.now },
     isRead: { type: Boolean, default: false }
 });

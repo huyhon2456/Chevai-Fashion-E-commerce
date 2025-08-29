@@ -43,15 +43,15 @@ const List = ({ token }) => {
 
   return (
     <>
-      <p className='mb-2'> PRODUCTS LIST</p>
+      <p className='mb-2 font-bold'> DANH SÁCH SẢN PHẨM</p>
       <div className='flex flex-col gap-2'>
         {/*tiêu đề */}
         <div className='hidden md:grid grid-cols-[1fr_3fr_1fr_1fr_1fr] items-center py-1 px-2 border bg-gray-300 text-sm'>
-          <b>Image</b>
-          <b>Name</b>
-          <b>Type</b>
-          <b>Price</b>
-          <b className='text-center'>Action</b>
+          <b>Hình ảnh</b>
+          <b>Tên</b>
+          <b>Loại</b>
+          <b>Giá</b>
+          <b className='text-center'>Hành động</b>
         </div>
         {/*hiện danh sách sp */}
         {

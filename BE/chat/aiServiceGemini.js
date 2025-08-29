@@ -22,7 +22,7 @@ try {
 }
 
 /**
- * Tìm sản phẩm đơn giản cho Gemini với productType structure
+ * Tìm sản phẩm đơn giản cho Gemini với productType structure - FIXED
  */
 async function findProductsForGemini(message) {
    try {
@@ -44,21 +44,47 @@ async function findProductsForGemini(message) {
             console.log(`🔍 Searching by name pattern: "${searchPattern}"`);
          }
       } else {
-         // Use productType detection for general queries
+         // Use productType detection for general queries - IMPROVED LOGIC
          const productTypeMap = [
             { key: 'Hoodie', regex: /(hoodie|hodie|hoody|áo\s*khoác|áo\s*có\s*mũ|khoác)/i },
             { key: 'Sweater', regex: /(sweater|swetter|áo\s*len|áo\s*ấm|len)/i },
-            { key: 'T-shirt', regex: /(áo\s*thun|t-shirt|tshirt|t\s*shirt|áo\s*tee|thun(?!\s*(relaxed|ringer)))/i },
+            { key: 'T-shirt', regex: /(áo\s*thun(?!\s*(relaxed|ringer))|t-shirt|tshirt|t\s*shirt|áo\s*tee)/i },
             { key: 'RelaxedFit', regex: /(relaxed\s*fit|áo thun relaxed fit|relaxed)/i },
             { key: 'Ringer', regex: /(ringer|áo thun ringer|viền)/i },
             { key: 'Jogger', regex: /(jogger|jooger|quần\s*thể\s*thao|quần\s*dài|quần\s*ống\s*suông|quần(?!\s*(short|sort)))/i }
          ];
 
-         for (const { key, regex } of productTypeMap) {
-            if (regex.test(lowerMessage)) {
-               query.productType = key;
-               console.log(`🎯 Detected productType: ${key} from message: "${message}"`);
-               break;
+         // PRIORITY: Detect áo vs quần first
+         const isShirtQuery = /(áo(?!\s*khoác)|shirt|tshirt|t-shirt|hoodie|sweater|ringer|relaxed)/i.test(lowerMessage);
+         const isPantsQuery = /(quần|pants|jogger|jean)/i.test(lowerMessage);
+
+         if (isShirtQuery && !isPantsQuery) {
+            // Find shirts/tops only
+            const shirtTypes = ['T-shirt', 'RelaxedFit', 'Ringer', 'Hoodie', 'Sweater'];
+            for (const { key, regex } of productTypeMap) {
+               if (shirtTypes.includes(key) && regex.test(lowerMessage)) {
+                  query.productType = key;
+                  console.log(`🎯 Detected shirt type: ${key} from message: "${message}"`);
+                  break;
+               }
+            }
+            // If no specific shirt type, get all shirts
+            if (!query.productType) {
+               query.productType = { $in: shirtTypes };
+               console.log(`👕 Getting all shirts for query: "${message}"`);
+            }
+         } else if (isPantsQuery && !isShirtQuery) {
+            // Find pants only
+            query.productType = 'Jogger';
+            console.log(`👖 Detected pants type: Jogger from message: "${message}"`);
+         } else {
+            // General search - use specific detection
+            for (const { key, regex } of productTypeMap) {
+               if (regex.test(lowerMessage)) {
+                  query.productType = key;
+                  console.log(`🎯 Detected productType: ${key} from message: "${message}"`);
+                  break;
+               }
             }
          }
       }
@@ -100,8 +126,18 @@ export async function generateGeminiAI(message, roomId = null) {
       // Check if user is asking for specific product type
       const hasSpecificProductType = /(hoodie|sweater|jogger|t-shirt|áo thun|quần|ringer|relaxed)/i.test(message);
       
-      // Check for image confirmation first - BUT NOT if asking for different product
-      if (isImageConfirmation(message, roomId) && !hasSpecificProductType) {
+      // Check if user is asking about sizing/fit
+      const isSizeInquiry = /(cân\s*nặng|kg|size|vừa|không|fit|lớn|nhỏ|rộng|chật|mặc.*có|đi.*được|phù\s*hợp|fit.*không)/i.test(message);
+      
+      // Define image confirmation pattern - UPDATED to exclude size inquiries
+      const isImageConfirmation = (/\b(có|yes|ok|được|show|xem|hiển thị|cho xem|oke|đc|muốn|want|ừ|ừm|vâng)\b/i.test(message) ||
+                                 message.trim().toLowerCase() === 'có' ||
+                                 message.trim().toLowerCase() === 'ok' ||
+                                 message.trim().toLowerCase() === 'yes' ||
+                                 message.trim().toLowerCase() === 'ừ') && !isSizeInquiry;
+      
+      // Check for image confirmation first - BUT NOT if asking for different product OR sizing
+      if (isImageConfirmation && !hasSpecificProductType && !isSizeInquiry) {
          const lastProduct = getLastMentionedProduct(roomId);
          if (lastProduct && lastProduct.image && lastProduct.image.length > 0) {
             const price = Math.round(lastProduct.price / 1000) + 'k';
@@ -121,12 +157,41 @@ export async function generateGeminiAI(message, roomId = null) {
       
       console.log(`🚀 Using real Gemini AI for: "${message}"`);
       
-      // 1. Check if user is referring to a previous product (STRICTER CHECK)
+      // 1. FIRST: Check for image confirmation
       const context = getConversationContext(roomId);
+      
+      if (isImageConfirmation && context && context.lastAction === 'asked_for_image' && context.lastProduct) {
+         console.log('🔍 Image confirmation detected, showing product image');
+         
+         const product = context.lastProduct;
+         const imageUrl = product.image && product.image[0] ? product.image[0] : null;
+         
+         if (imageUrl) {
+            const responseText = `Dạ! Đây là ảnh sản phẩm ạ! 😍\n\n📸 **${product.name}**\n💰 Giá: ${product.price.toLocaleString()}k\n📏 Size: ${product.sizes.join(', ')}\n🎯 ${product.productType}\n\nSản phẩm này đẹp lắm! Bạn thích không? 🥰`;
+            
+            // Update context
+            setConversationContext(roomId, {
+               lastAction: 'showed_image',
+               lastProduct: product,
+               lastProducts: context.lastProducts,
+               lastResponse: responseText,
+               originalQuery: context.originalQuery,
+               aiProvider: 'Gemini'
+            });
+            
+            return {
+               message: responseText,
+               image: imageUrl
+            };
+         }
+      }
+      
+      // 2. Check if user is referring to a previous product (STRICTER CHECK)
+      // const context = getConversationContext(roomId); // Already got above
       let isReferringToPrevious = /(áo này|sản phẩm này|cái này|này.*có|có.*này|item này|product này)/i.test(message) &&
                                   !hasSpecificProductType;
       
-      // 2. Tìm sản phẩm liên quan - ALWAYS SEARCH NEW if user mentions specific product type
+      // 3. Tìm sản phẩm liên quan - ALWAYS SEARCH NEW if user mentions specific product type
       let products = [];
       
       if (isReferringToPrevious && context?.lastProducts?.length > 0) {
@@ -161,46 +226,86 @@ export async function generateGeminiAI(message, roomId = null) {
          productContextCache[roomId] = products;
       }
 
-      // 4. Prompt cho Gemini - THÔNG MINH KHÔNG HARD-CODE
+      // 4. Prompt cho Gemini - TỰ NHIÊN VÀ ĐÚNG TRỌNG TÂM - IMPROVED
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       console.log('🎯 Using Gemini model: gemini-1.5-flash');
-      const prompt = `Bạn là Ai-chan 🤖, trợ lý thời trang thông minh của Chevai Fashion.
+      
+      // Phân tích ý định người dùng
+      const isShirtQuery = /(áo(?!\s*khoác)|shirt|tshirt|t-shirt|hoodie|sweater|ringer|relaxed)/i.test(message);
+      const isPantsQuery = /(quần|pants|jogger|jean)/i.test(message);
+      const queryType = isShirtQuery ? "áo/shirt" : isPantsQuery ? "quần/pants" : "general";
+      
+      const prompt = `Bạn là Ai-chan 🤖, trợ lý thời trang thân thiện của Chevai Fashion.
 
-QUAN TRỌNG: CHỈ sử dụng thông tin từ danh sách sản phẩm bên dưới. KHÔNG tự tạo ra tên sản phẩm, mô tả, hay thông tin nào khác.
+**TIN NHẮN CỦA USER**: "${message}"
+**LOẠI QUERY**: ${queryType}
 
-User hỏi: "${message}"
+**NGUYÊN TẮC TRẢ LỜI**:
+- Trả lời TỰ NHIÊN như người bạn thật
+- NGẮN GỌN, dễ hiểu (1-3 câu)
+- ĐÚNG TRỌNG TÂM với câu hỏi
+- ${isShirtQuery ? "CHỈ GIỚI THIỆU ÁO (T-shirt, Hoodie, Sweater, RelaxedFit, Ringer)" : ""}
+- ${isPantsQuery ? "CHỈ GIỚI THIỆU QUẦN (Jogger)" : ""}
+- Sử dụng emoji phù hợp nhưng không quá nhiều
+- CHỈ dùng thông tin từ danh sách sản phẩm bên dưới
 
-DANH SÁCH SẢN PHẨM CÓ SẴN:
+**SẢN PHẨM CÓ SẴN**:
 ${productContext}
 
-QUY TẮC BẮT BUỘC:
-1. Nếu user nói TÊN SẢN PHẨM CỤ THỂ (có trong danh sách) + "đi/nha/vậy/ok" → Hiểu đây là CHỌN sản phẩm đó, trả lời chi tiết về sản phẩm đó với giá, mô tả, size
-2. Nếu user hỏi về SIZE/CÂN NẶNG → CHỈ sử dụng sizes có SẴN của từng sản phẩm trong danh sách. Tư vấn theo nguyên tắc:
-   - Xem sizes có sẵn của từng sản phẩm trong danh sách
-   - Tư vấn size phù hợp: 45-55kg (S), 55-65kg (M), 65-75kg (L), 75kg+ (XL)
-   - CHỈ giới thiệu sản phẩm có size phù hợp với cân nặng
-   - Nếu sản phẩm không có size phù hợp → Không giới thiệu sản phẩm đó
-   - VÍ DỤ: User 60kg → Chỉ giới thiệu sản phẩm nào có size M trong danh sách
-3. Nếu user hỏi "áo này", "sản phẩm này" mà không rõ là gì → Hỏi lại: "Bạn đang muốn hỏi về áo nào nhỉ? 🤔"
-4. CHỈ giới thiệu sản phẩm có TRONG DANH SÁCH TRÊN
-5. KHÔNG tự tạo ra: "áo thun kiểu Ringer", "in hình anh đào", hay bất kỳ mô tả nào không có
-6. Sử dụng CHÍNH XÁC tên sản phẩm từ danh sách
-7. Trả lời ngắn gọn, thân thiên như người bạn
-8. Nếu có sản phẩm phù hợp: giới thiệu với giá và thông tin CHÍNH XÁC
-9. Kết thúc bằng câu hỏi để tiếp tục chat
-10. Nếu không liên quan thời trang: "Mình chỉ hỗ trợ về thời trang Chevai thôi! 😊"
+**CÁCH XỬ LÝ CÁC TÌNH HUỐNG**:
 
-VÍ DỤ TƯ VẤN SIZE:
-User: "60kg thì mình nên mặc size bao nhiêu"
-→ Kiểm tra danh sách, tìm sản phẩm có size M, chỉ giới thiệu những sản phẩm đó
-→ "Với cân nặng 60kg, bạn nên mặc size M. Trong danh sách có: [Tên sản phẩm có size M] - [giá] - Size: [chỉ liệt kê sizes thực tế]"
+1. **CHÀO HỎI**: Chào ngắn gọn + hỏi cần gì
+   VD: "Chào bạn! Cần tìm trang phục gì không? 😊"
 
-VÍ DỤ CHỌN SẢN PHẨM:
-User: "Áo Thun Ringer Relaxed Fit Tropical Cherries Sweet đi"
-→ Hiểu: User chọn sản phẩm này, trả lời chi tiết về nó với sizes thực tế
+2. **HỎI VỀ ÁO** (áo, shirt, hoodie, sweater):
+   - CHỈ giới thiệu các loại áo từ danh sách
+   - Nói giá và 1-2 điểm nổi bật
+   - Tư vấn size phù hợp nếu user nhắc cân nặng
 
-VÍ DỤ SAI: "áo thun kiểu Ringer Relaxed Fit in hình anh đào" ← KHÔNG ĐƯỢC LÀM
-VÍ DỤ ĐÚNG: Sử dụng tên từ danh sách: "Áo Thun Relaxed Fit Porsche Berry Porsche T-Shirt"`;
+3. **HỎI VỀ QUẦN** (quần, jogger, pants):
+   - CHỈ giới thiệu quần từ danh sách
+   - Nói giá và đặc điểm
+   - Tư vấn size phù hợp nếu user nhắc cân nặng
+
+4. **HỎI VỀ SIZE/CÂN NẶNG/FIT** (quan trọng):
+   - Tư vấn cụ thể dựa trên cân nặng:
+     * 45-55kg → Size S
+     * 55-65kg → Size M  
+     * 65-75kg → Size L
+     * 75kg+ → Size XL
+   - Kiểm tra size có sẵn trong sản phẩm
+   - Nếu size phù hợp có sẵn: "Size X sẽ vừa vặn với cân nặng của bạn"
+   - Nếu size không có: "Size phù hợp hiện chưa có, size gần nhất là Y"
+   - Đưa ra lời khuyên về fit (ôm, vừa vặn, rộng rãi)
+
+5. **MUỐN XEM ẢNH**:
+   - Nói "Đây nha!" hoặc "Xem này!"
+   - Mô tả ngắn về sản phẩm
+
+6. **XÁC NHẬN** (có, ok, được):
+   - Hiểu user đồng ý/chọn sản phẩm
+   - Hỏi có cần hỗ trợ gì thêm
+
+**VÍ DỤ TRẢ LỜI HAY**:
+- User: "60kg có áo nào phù hợp?"
+  → "Với 60kg thì size M sẽ vừa vặn! Mình gợi ý áo Relaxed Fit 159k hoặc áo Ringer 169k, cả hai đều đẹp và thoải mái lắm! Bạn thích kiểu nào hơn? 😊"
+
+- User: "có quần nào đẹp?"
+  → "Có nha! Quần Ống Suông Nỉ Bông 389k, chất nỉ bông mềm mại, phom suông thoải mái. Bạn muốn xem ảnh không? 👖"
+
+- User: "mình 60kg mặc áo đó có vừa không?"
+  → "Với 60kg của bạn thì size M sẽ vừa vặn! Áo này có size M không nha, sẽ ôm vừa phải và thoải mái. Bạn thích phom vừa hay rộng hơn? 😊"
+
+- User: "75kg mặc size nào?"
+  → "Với 75kg thì size L hoặc XL đều phù hợp! Size L sẽ vừa vặn, size XL sẽ rộng rãi thoải mái hơn. Bạn thích phom nào? 👕"
+
+**LƯU Ý QUAN TRỌNG**:
+- KHÔNG nhầm lẫn giữa áo và quần
+- KHÔNG tự tạo tên sản phẩm
+- CHỈ dùng thông tin từ danh sách
+- Luôn có câu hỏi cuối để tiếp tục chat
+
+Hãy trả lời ĐÚNG TRỌNG TÂM và TỰ NHIÊN!`;
 
       const result = await model.generateContent(prompt);
       const response = result.response.text();
@@ -287,18 +392,42 @@ VÍ DỤ ĐÚNG: Sử dụng tên từ danh sách: "Áo Thun Relaxed Fit Porsche
          };
       }
 
-      // 6. Store conversation context for product mentions and image requests
+      // 6. Store conversation context for product mentions and image requests - FIXED
       const isAskingForImage = /(muốn xem ảnh|có muốn xem|xem ảnh không|want to see|see image|ảnh của sản phẩm|ảnh không)/i.test(response);
       const mentionsProduct = /(hoodie|sweater|jogger|t-shirt|áo|quần)/i.test(response) && contextProducts.length > 0;
       
       if (roomId && (isAskingForImage || mentionsProduct)) {
-         const productToStore = recommendedProduct || (contextProducts.length > 0 ? contextProducts[0] : null);
+         // FIXED: Store the most relevant product based on original query
+         let productToStore = null;
+         
+         if (recommendedProduct) {
+            productToStore = recommendedProduct;
+         } else if (contextProducts.length > 0) {
+            // Find most relevant product based on original message type
+            const isShirtQuery = /(áo(?!\s*khoác)|shirt|tshirt|t-shirt|hoodie|sweater|ringer|relaxed)/i.test(message);
+            const isPantsQuery = /(quần|pants|jogger|jean)/i.test(message);
+            
+            if (isShirtQuery) {
+               // Find first shirt type
+               const shirtTypes = ['T-shirt', 'RelaxedFit', 'Ringer', 'Hoodie', 'Sweater'];
+               productToStore = contextProducts.find(p => shirtTypes.includes(p.productType)) || contextProducts[0];
+               console.log(`👕 Storing shirt for context: ${productToStore.name}`);
+            } else if (isPantsQuery) {
+               // Find first pants type
+               productToStore = contextProducts.find(p => p.productType === 'Jogger') || contextProducts[0];
+               console.log(`👖 Storing pants for context: ${productToStore.name}`);
+            } else {
+               productToStore = contextProducts[0];
+            }
+         }
+         
          if (productToStore) {
             setConversationContext(roomId, {
                lastAction: isAskingForImage ? 'asked_for_image' : 'mentioned_product',
                lastProduct: productToStore,
                lastProducts: contextProducts, // Store all products for choice
                lastResponse: response,
+               originalQuery: message, // Store original query for better context
                aiProvider: 'Gemini'
             });
             console.log(`💭 Stored context - ${isAskingForImage ? 'asking for image' : 'mentioned product'}: ${productToStore.name}`);

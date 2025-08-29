@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"], // Đảm bảo quét tất cả file
+  content: ["./src/**/*.{js,jsx,ts,tsx}"], 
   theme: {
     extend: {},
   },
